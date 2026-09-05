@@ -2,15 +2,25 @@ name: Windows build
 
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: windows-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Check vcpkg
         shell: pwsh
@@ -30,5 +40,26 @@ jobs:
       - name: Build
         run: cmake --build build --config Release --parallel
 
-      - name: Test
+      - name: Test core
         run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Create sample map
+        run: python tools/make_sample.py
+
+      - name: Smoke test CLI
+        shell: pwsh
+        run: |
+          $env:PATH = "$PWD\build\vcpkg_installed\x64-windows\bin;$env:PATH"
+          & ".\build\Release\map_coloring.exe" ".\samples\map1.bmp" ".\colored.bmp"
+
+          if ($LASTEXITCODE -ne 0) {
+              throw "CLI returned exit code $LASTEXITCODE"
+          }
+
+          if (-not (Test-Path ".\colored.bmp")) {
+              throw "CLI did not create colored.bmp"
+          }
+
+          if ((Get-Item ".\colored.bmp").Length -le 54) {
+              throw "colored.bmp is too small to be a valid BMP"
+          }
