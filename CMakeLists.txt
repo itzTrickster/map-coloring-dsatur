@@ -57,7 +57,6 @@ if(MAP_COLORING_BUILD_GUI)
 
     add_executable(map_coloring src/mapread.c)
     target_include_directories(map_coloring PRIVATE include)
-    target_compile_definitions(map_coloring PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_link_libraries(map_coloring PRIVATE
         map_core
         GLEW::GLEW
