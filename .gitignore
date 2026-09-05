@@ -1,5 +1,6 @@
 # Build output
 build/
+build-*/
 out/
 bin/
 obj/
@@ -9,6 +10,8 @@ CMakeCache.txt
 cmake_install.cmake
 CTestTestfile.cmake
 Testing/
+compile_commands.json
+CMakeUserPresets.json
 
 # Visual Studio
 .vs/
@@ -28,10 +31,16 @@ Testing/
 *.ilk
 *.obj
 
-# Runtime files
+# Runtime and generated files
 app_state.txt
 map_coloring.log
 colored_maps/
+colored.bmp
+samples/*.bmp
+
+# Python
+__pycache__/
+*.pyc
 
 # OS and editors
 .DS_Store
