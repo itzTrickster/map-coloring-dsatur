@@ -82,7 +82,7 @@ flowchart LR
 - vcpkg;
 - OpenGL 3.3+.
 
-`GLEW` и `GLFW` указаны в `vcpkg.json`. В manifest также зафиксирован `builtin-baseline`, поэтому версии зависимостей воспроизводимы между сборками.
+`GLEW` и `GLFW` указаны в `vcpkg.json`.
 
 ## Сборка на Windows
 
