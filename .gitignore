@@ -1,0 +1,40 @@
+# Build output
+build/
+out/
+bin/
+obj/
+vcpkg_installed/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+
+# Visual Studio
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.user
+
+# Compiled files
+*.exe
+*.dll
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.obj
+
+# Runtime files
+app_state.txt
+map_coloring.log
+colored_maps/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
