@@ -45,7 +45,7 @@ flowchart LR
 .
 ├── .github/workflows/
 │   ├── core.yml                # GCC, Clang, ASan и UBSan
-│   └── windows.yml             # полная сборка GUI на Windows
+│   └── windows.yml             # полная сборка GUI и CLI smoke test
 ├── src/
 │   ├── mapread.c               # точка входа GUI и CLI
 │   ├── mapread_state.inc       # состояние приложения и UI helpers
@@ -173,13 +173,16 @@ ctest --test-dir build --output-on-failure
 
 ## Автоматические проверки
 
-При каждом push и pull request GitHub Actions выполняет несколько независимых проверок:
+При pull request и после изменений в `main` GitHub Actions выполняет несколько независимых проверок:
 
 - сборка core-модулей GCC на Linux с `-Wall -Wextra -Wpedantic -Werror`;
 - сборка core-модулей Clang с теми же строгими предупреждениями;
 - тесты под AddressSanitizer и UndefinedBehaviorSanitizer;
 - полная Windows-сборка GUI через MSVC, OpenGL, GLEW, GLFW и vcpkg;
-- запуск core-тестов на Windows.
+- запуск core-тестов на Windows;
+- end-to-end CLI smoke test: генерация BMP, запуск программы и проверка выходного файла.
+
+Workflows используют минимальные read-only permissions, отменяют устаревшие запуски для той же ветки и имеют явные таймауты.
 
 Локально строгий режим можно включить так:
 
