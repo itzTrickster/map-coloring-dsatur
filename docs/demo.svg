@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">Пример работы Map Coloring with DSATUR</title>
+  <desc id="desc">Слева исходная карта с белыми областями, справа та же карта после раскраски.</desc>
+  <style>
+    text { font-family: Segoe UI, Arial, sans-serif; fill: #202124; }
+    .title { font-size: 28px; font-weight: 600; }
+    .label { font-size: 20px; }
+    .border { stroke: #111; stroke-width: 5; stroke-linejoin: round; }
+  </style>
+
+  <rect width="1200" height="560" fill="#ffffff"/>
+  <text class="title" x="300" y="48" text-anchor="middle">Входная карта</text>
+  <text class="title" x="900" y="48" text-anchor="middle">После раскраски</text>
+
+  <g transform="translate(70 90)">
+    <polygon class="border" fill="#fff" points="0,0 220,0 180,150 0,180"/>
+    <polygon class="border" fill="#fff" points="220,0 470,0 470,180 310,160 180,150"/>
+    <polygon class="border" fill="#fff" points="0,180 180,150 230,300 0,380"/>
+    <polygon class="border" fill="#fff" points="180,150 310,160 300,310 230,300"/>
+    <polygon class="border" fill="#fff" points="310,160 470,180 470,380 300,310"/>
+    <polygon class="border" fill="#fff" points="0,380 230,300 300,310 240,430 0,430"/>
+    <polygon class="border" fill="#fff" points="300,310 470,380 470,430 240,430"/>
+  </g>
+
+  <g transform="translate(670 90)">
+    <polygon class="border" fill="#FFD48C" points="0,0 220,0 180,150 0,180"/>
+    <polygon class="border" fill="#8ED69E" points="220,0 470,0 470,180 310,160 180,150"/>
+    <polygon class="border" fill="#95C2FF" points="0,180 180,150 230,300 0,380"/>
+    <polygon class="border" fill="#FAB0FF" points="180,150 310,160 300,310 230,300"/>
+    <polygon class="border" fill="#FFD48C" points="310,160 470,180 470,380 300,310"/>
+    <polygon class="border" fill="#8ED69E" points="0,380 230,300 300,310 240,430 0,430"/>
+    <polygon class="border" fill="#95C2FF" points="300,310 470,380 470,430 240,430"/>
+  </g>
+
+  <text class="label" x="600" y="545" text-anchor="middle">Схема работы на тестовой карте</text>
+</svg>
