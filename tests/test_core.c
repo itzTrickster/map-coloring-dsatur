@@ -19,26 +19,81 @@ static int coloring_is_valid(const Graph* g, const int* colors) {
     return 1;
 }
 
-static int test_dsatur_k4(void) {
-    Graph g = {0};
-    g.region_count = 4;
-    g.adj = (int**)calloc(4, sizeof(int*));
-    if (!g.adj) return 0;
+static int max_color_used(const int* colors, int count) {
+    int max_color = 0;
+    for (int i = 0; i < count; ++i) {
+        if (colors[i] > max_color) max_color = colors[i];
+    }
+    return max_color;
+}
 
-    for (int i = 0; i < 4; ++i) {
-        g.adj[i] = (int*)calloc(4, sizeof(int));
-        if (!g.adj[i]) return 0;
-        for (int j = 0; j < 4; ++j) {
-            if (i != j) g.adj[i][j] = 1;
+static int init_complete_graph(Graph* g, int count) {
+    if (!g || count <= 0) return 0;
+
+    memset(g, 0, sizeof(*g));
+    g->region_count = count;
+    g->adj = (int**)calloc((size_t)count, sizeof(int*));
+    if (!g->adj) return 0;
+
+    for (int i = 0; i < count; ++i) {
+        g->adj[i] = (int*)calloc((size_t)count, sizeof(int));
+        if (!g->adj[i]) {
+            for (int j = 0; j < i; ++j) free(g->adj[j]);
+            free(g->adj);
+            g->adj = NULL;
+            return 0;
+        }
+
+        for (int j = 0; j < count; ++j) {
+            if (i != j) g->adj[i][j] = 1;
         }
     }
 
+    return 1;
+}
+
+static void free_test_graph(Graph* g) {
+    if (!g || !g->adj) return;
+
+    for (int i = 0; i < g->region_count; ++i) free(g->adj[i]);
+    free(g->adj);
+    g->adj = NULL;
+    g->region_count = 0;
+}
+
+static int test_dsatur_k4(void) {
+    Graph g;
+    if (!init_complete_graph(&g, 4)) return 0;
+
     int* colors = dsatur(&g);
-    int ok = coloring_is_valid(&g, colors);
+    int ok = coloring_is_valid(&g, colors) && max_color_used(colors, 4) == 4;
 
     free(colors);
-    for (int i = 0; i < 4; ++i) free(g.adj[i]);
-    free(g.adj);
+    free_test_graph(&g);
+    return ok;
+}
+
+static int test_dsatur_k5_fallback(void) {
+    Graph g;
+    if (!init_complete_graph(&g, 5)) return 0;
+
+    int* colors = dsatur(&g);
+    int ok = coloring_is_valid(&g, colors) && max_color_used(colors, 5) == 5;
+
+    free(colors);
+    free_test_graph(&g);
+    return ok;
+}
+
+static int test_dsatur_rejects_k6(void) {
+    Graph g;
+    if (!init_complete_graph(&g, 6)) return 0;
+
+    int* colors = dsatur(&g);
+    int ok = colors == NULL;
+
+    free(colors);
+    free_test_graph(&g);
     return ok;
 }
 
@@ -93,9 +148,24 @@ static int test_bmp_roundtrip(void) {
     return ok;
 }
 
+static int test_missing_bmp(void) {
+    Image* image = read_bmp("file_that_should_not_exist_7f2a4b.bmp");
+    int ok = image == NULL;
+    free_image(image);
+    return ok;
+}
+
 int main(void) {
     if (!test_dsatur_k4()) {
         fprintf(stderr, "test_dsatur_k4 failed\n");
+        return 1;
+    }
+    if (!test_dsatur_k5_fallback()) {
+        fprintf(stderr, "test_dsatur_k5_fallback failed\n");
+        return 1;
+    }
+    if (!test_dsatur_rejects_k6()) {
+        fprintf(stderr, "test_dsatur_rejects_k6 failed\n");
         return 1;
     }
     if (!test_graph_from_image()) {
@@ -104,6 +174,10 @@ int main(void) {
     }
     if (!test_bmp_roundtrip()) {
         fprintf(stderr, "test_bmp_roundtrip failed\n");
+        return 1;
+    }
+    if (!test_missing_bmp()) {
+        fprintf(stderr, "test_missing_bmp failed\n");
         return 1;
     }
 
