@@ -1,8 +1,11 @@
 # Map Coloring with DSATUR
 
 [![Core checks](https://github.com/itzTrickster/map-coloring-dsatur/actions/workflows/core.yml/badge.svg)](https://github.com/itzTrickster/map-coloring-dsatur/actions/workflows/core.yml)
+[![Windows build](https://github.com/itzTrickster/map-coloring-dsatur/actions/workflows/windows.yml/badge.svg)](https://github.com/itzTrickster/map-coloring-dsatur/actions/workflows/windows.yml)
 
 Программа на C для раскраски карт, представленных 24-битными BMP-изображениями. Она выделяет области карты, строит граф смежности и раскрашивает его алгоритмом DSATUR с backtracking. Есть графический режим на OpenGL и отдельный CLI-режим.
+
+Репозиторий содержит только программу раскраски карты и технические файлы, необходимые для сборки и проверки. Отчёт по курсовой работе и остальные учебные материалы сюда не входят.
 
 ![Пример работы](docs/demo.svg)
 
@@ -34,10 +37,15 @@ flowchart LR
 
 Каждая связная область карты становится вершиной графа. Если две области имеют общую границу, между соответствующими вершинами добавляется ребро. DSATUR выбирает следующую вершину по максимальной насыщенности, то есть по количеству разных цветов у уже раскрашенных соседей. При равной насыщенности приоритет получает вершина с большей степенью.
 
+Сначала алгоритм ищет раскраску максимум в 4 цвета. Если решение не найдено, запускается повторный поиск с ограничением в 5 цветов. Если и он не даёт решения, функция раскраски возвращает ошибку.
+
 ## Структура проекта
 
 ```text
 .
+├── .github/workflows/
+│   ├── core.yml                # GCC, Clang, ASan и UBSan
+│   └── windows.yml             # полная сборка GUI на Windows
 ├── src/
 │   ├── mapread.c               # точка входа GUI и CLI
 │   ├── mapread_state.inc       # состояние приложения и UI helpers
@@ -57,11 +65,12 @@ flowchart LR
 │   └── make_sample.py          # генератор небольшой тестовой карты
 ├── docs/
 │   └── demo.svg
+├── .editorconfig
 ├── CMakeLists.txt
 └── vcpkg.json
 ```
 
-`mapread.c` разбит на несколько `.inc` файлов только по зонам ответственности. При сборке они включаются в одну translation unit, поэтому логика приложения остаётся общей, а основной файл не превращается в большой монолит.
+`mapread.c` разбит на несколько `.inc` файлов по зонам ответственности. При сборке они включаются в одну translation unit, поэтому логика приложения остаётся общей, а основной файл не превращается в большой монолит.
 
 ## Требования
 
@@ -91,9 +100,11 @@ cmake --build build --config Release
 build\Release\map_coloring.exe
 ```
 
+Если `VCPKG_ROOT` не задан, вместо него можно передать полный путь к `scripts\buildsystems\vcpkg.cmake`.
+
 ## Тестовая карта
 
-В репозиторий не добавлен большой набор исходных карт. Для быстрой проверки можно создать небольшую BMP-карту локально:
+Большой набор исходных карт в репозиторий не добавлен. Для быстрой проверки можно создать небольшую BMP-карту локально:
 
 ```powershell
 python .\tools\make_sample.py
@@ -104,6 +115,8 @@ python .\tools\make_sample.py
 ```text
 samples\map1.bmp
 ```
+
+Каталог с сгенерированными BMP добавлен в `.gitignore`, поэтому тестовая карта не попадёт в коммит случайно.
 
 ## Запуск
 
@@ -139,15 +152,54 @@ CLI выводит прогресс, количество использован
 
 ## Тесты
 
-Основные модули `bmp`, `graph` и `dsatur` не зависят от Windows GUI и тестируются отдельно:
+Основные модули `bmp`, `graph` и `dsatur` можно собирать и тестировать отдельно от Windows GUI:
 
 ```bash
-cmake -S . -B build -DBUILD_TESTING=ON
+cmake -S . -B build \
+  -DBUILD_TESTING=ON \
+  -DMAP_COLORING_BUILD_GUI=OFF
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-Эта же проверка запускается в GitHub Actions при push и pull request.
+Тесты проверяют:
+
+- DSATUR на полном графе K4;
+- fallback до 5 цветов на K5;
+- корректный отказ для K6 при лимите в 5 цветов;
+- построение графа смежности по BMP-подобному изображению;
+- запись и повторное чтение BMP;
+- обработку отсутствующего BMP-файла.
+
+## Автоматические проверки
+
+При каждом push и pull request GitHub Actions выполняет несколько независимых проверок:
+
+- сборка core-модулей GCC на Linux с `-Wall -Wextra -Wpedantic -Werror`;
+- сборка core-модулей Clang с теми же строгими предупреждениями;
+- тесты под AddressSanitizer и UndefinedBehaviorSanitizer;
+- полная Windows-сборка GUI через MSVC, OpenGL, GLEW, GLFW и vcpkg;
+- запуск core-тестов на Windows.
+
+Локально строгий режим можно включить так:
+
+```bash
+cmake -S . -B build \
+  -DBUILD_TESTING=ON \
+  -DMAP_COLORING_BUILD_GUI=OFF \
+  -DMAP_COLORING_WARNINGS_AS_ERRORS=ON
+```
+
+Для GCC и Clang можно дополнительно включить санитайзеры:
+
+```bash
+cmake -S . -B build-sanitized \
+  -DBUILD_TESTING=ON \
+  -DMAP_COLORING_BUILD_GUI=OFF \
+  -DMAP_COLORING_ENABLE_SANITIZERS=ON
+cmake --build build-sanitized
+ctest --test-dir build-sanitized --output-on-failure
+```
 
 ## Ограничения
 
