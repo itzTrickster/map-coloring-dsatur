@@ -104,8 +104,8 @@ static int test_graph_from_image(void) {
     img.data = (Pixel*)calloc((size_t)img.width * (size_t)img.height, sizeof(Pixel));
     if (!img.data) return 0;
 
-    Pixel white = {255, 255, 255};
-    Pixel black = {0, 0, 0};
+    Pixel white = { .r = 255, .g = 255, .b = 255 };
+    Pixel black = { .r = 0, .g = 0, .b = 0 };
 
     for (int y = 0; y < img.height; ++y) {
         for (int x = 0; x < (int)img.width; ++x) {
@@ -129,10 +129,10 @@ static int test_bmp_roundtrip(void) {
     img.data = (Pixel*)calloc(4, sizeof(Pixel));
     if (!img.data) return 0;
 
-    img.data[0] = (Pixel){255, 0, 0};
-    img.data[1] = (Pixel){0, 255, 0};
-    img.data[2] = (Pixel){0, 0, 255};
-    img.data[3] = (Pixel){255, 255, 255};
+    img.data[0] = (Pixel){ .r = 255, .g = 0, .b = 0 };
+    img.data[1] = (Pixel){ .r = 0, .g = 255, .b = 0 };
+    img.data[2] = (Pixel){ .r = 0, .g = 0, .b = 255 };
+    img.data[3] = (Pixel){ .r = 255, .g = 255, .b = 255 };
 
     int ok = write_bmp(path, &img);
     Image* loaded = ok ? read_bmp(path) : NULL;
