@@ -2,7 +2,7 @@
 
 *.c text eol=lf
 *.h text eol=lf
-*.inc text eol=lf
+*.inc text eol=lf linguist-language=C
 *.md text eol=lf
 *.yml text eol=lf
 *.json text eol=lf
